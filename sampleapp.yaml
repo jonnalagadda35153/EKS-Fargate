@@ -13,10 +13,15 @@
 # http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
 
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: appf
-  namespace: app
+  namespace: dev
 spec:
   type: NodePort
   ports:
@@ -29,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: appf
-  namespace: app
+  namespace: dev
 spec:
   replicas: 3
   strategy:
@@ -66,7 +71,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: appf
-  namespace: app
+  namespace: dev
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing 
@@ -87,7 +92,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: appf
-  namespace: app
+  namespace: dev
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
