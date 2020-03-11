@@ -1,17 +1,3 @@
-# AWS DISCLAMER
-# Provided to Customer on 12 March 2020
-# ---
-
-# The following files are provided by AWS Professional Services describe the process to create an read-only breakglass role for security within your AWS Automated Landing Zone. These are non-production ready and are to be used for testing purposes.
-
-# These files is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
-# OR CONDITIONS OF ANY KIND, either express or implied. See the License
-# for the specific language governing permissions and limitations under the License.
-
-# (c) 2019 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-# This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-# http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
-
 import boto3
 import configparser
 import sys
@@ -35,6 +21,11 @@ apply_rbac = 'kubectl apply -f RBAC.yaml'
 print("Applying RBAC")
 os.system(apply_rbac)
 
+#Set up OIDC provider with the cluster and create the IAM policy used by the ALB Ingress Controller
+oidc_setup = 'eksctl utils associate-iam-oidc-provider --cluster '+str(CLUSTER_NAME)+' --approve'
+os.system(oidc_setup)
+print('OIDC setup is done')
+
 #Creating an iamserviceaccount and attaching role.
 print('Attaching policy to iamserviceaccount')
 attach_policy = 'eksctl create iamserviceaccount --name alb-ingress-controller --namespace kube-system --cluster ' + str(CLUSTER_NAME) +' --attach-policy-arn arn:aws:iam::'+str(AWS_ACCOUNT_ID)+':policy/'+str(ingress_role) +'--override-existing-serviceaccounts --approve '
@@ -43,11 +34,12 @@ os.system(attach_policy)
 print('Attached Policy')
 print("\n")
 
-
-
 #Installing  alb-ingress-controller
 #Make sure that serviceaccount name created above matches with serviceaccount provided in alb-ingress-controller.yaml file before installing ingress controller
 #Please update Cluster Name and VPC id and Region and ServiceAccount in the alb-ingress-controller.yml
 apply_ingress = 'kubectl apply -f alb-ingress-controller.yaml'
 os.system(apply_ingress)
+print('ALB ingress controller is installed')
+print('Check logs with the command')
+print('kubectl logs -n kube-system $(kubectl get po -n kube-system | egrep -o alb-ingress[a-zA-Z0-9-]+)')
 print("\n")
