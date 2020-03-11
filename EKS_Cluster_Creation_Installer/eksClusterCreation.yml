@@ -1,3 +1,18 @@
+# AWS DISCLAMER
+# Provided to Customer on 12 March 2020
+# ---
+
+# The following files are provided by AWS Professional Services describe the process to create an read-only breakglass role for security within your AWS Automated Landing Zone. These are non-production ready and are to be used for testing purposes.
+
+# These files is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+# OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+
+# (c) 2019 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+# This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
+# http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
+
+
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
@@ -20,11 +35,19 @@ vpc:
       us-east-1c:
         id: "subnet-0dcc08ba81ccd6b65"
         cidr: "172.31.102.0/24"
+
+#To use custom IAM role for the EKS cluster uncomment the section below and replace the ARN for the IAM role.
 #iam:
   #serviceRoleARN: "arn:aws:iam::057929149431:role/eksctl-de-fargate3-cluster-ServiceRole-OGOPFO55I4P7"
 
+
 fargateProfiles:
   - name: fp-default
+    #clusterName is not required is the profile is being built with cluster. This tag is reqired if the fargate profile is being added after cluster creation 
+    #clusterName: de-fargate3
+    #To use custom IAM role for pod execution uncomment the section below and replace the ARN for the IAM role.
+    #By default eksctl can create an IAM role for pod execution, provided IAM role attached to the machine running the scripts have the IAM role creation policy
+    #podExecutionRoleARN: arn:aws:iam::057929149431:role/eksctl-de-fargate3-cluster-FargatePodExecutionRole-134GNC7EN79MW
     selectors:
       # All workloads in the "default" Kubernetes namespace will be
       # scheduled onto Fargate:
@@ -35,11 +58,21 @@ fargateProfiles:
       # All workloads in the "metrics" Kubernetes namespace will be
       # scheduled onto Fargate:
       - namespace: metrics
+    
   - name: fp-dev
     selectors:
       # All workloads in the "dev" Kubernetes namespace matching the following
       # label selectors will be scheduled onto Fargate:
       - namespace: dev
+        #You can optionally specify Kubernetes labels to match for the selector. The selector only matches pods that have all of the labels that are specified in the selector.
+        #labels:
+          #env: dev
+          #check: passed
+    #The IDs of subnets to launch pods into that use this profile. At this time, pods running on Fargate are not assigned public IP addresses, so only private subnets (with no direct route to an Internet Gateway) are accepted for this parameter.      
+    #subnets:
+    #- subnet-017e96618658d1383
+    #- subnet-0ebdef638fbfd2c0b
+    #- subnet-0dcc08ba81ccd6b65
           
 cloudWatch:
   clusterLogging:

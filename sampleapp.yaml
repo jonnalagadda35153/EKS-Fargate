@@ -1,0 +1,102 @@
+# AWS DISCLAMER
+# Provided to Customer on 12 March 2020
+# ---
+
+# The following files are provided by AWS Professional Services describe the process to create an read-only breakglass role for security within your AWS Automated Landing Zone. These are non-production ready and are to be used for testing purposes.
+
+# These files is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+# OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+
+# (c) 2019 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+# This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
+# http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: appf
+  namespace: app
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: appf
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appf
+  namespace: app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 2
+  selector:
+    matchLabels:
+      app: appf
+  template:
+    metadata:
+      labels:
+        app: appf
+    spec:
+      containers:
+        - name: appf
+          image: dmilan/docker-sample-restapp-flask
+          resources:
+            requests:
+              cpu: 200m
+              memory: 0.5Gi
+            limits:
+              cpu: 400m
+              memory: 1Gi
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: appf
+  namespace: app
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing 
+    alb.ingress.kubernetes.io/target-type: ip
+    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:682651395775:certificate/2bf2988f-7d08-43f4-99d8-51069b2d22f9
+  labels:
+    app: appf
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /ping
+            backend:
+              serviceName: appf
+              servicePort: 80
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: appf
+  namespace: app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: appf
+  minReplicas: 3
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50

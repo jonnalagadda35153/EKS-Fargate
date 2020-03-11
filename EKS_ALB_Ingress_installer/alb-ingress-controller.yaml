@@ -72,7 +72,6 @@ spec:
             #  value: SECRETVALUE
           # Repository location of the ALB Ingress Controller.
           image: docker.io/amazon/aws-alb-ingress-controller:v1.1.5
-          #image: 894847497797.dkr.ecr.us-west-2.amazonaws.com/aws-alb-ingress-controller:v1.1.4
           imagePullPolicy: Always
           name: server
           resources: {}
