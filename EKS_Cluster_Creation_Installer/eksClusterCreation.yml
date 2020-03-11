@@ -1,0 +1,46 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: de-fargate3
+  region: us-east-1
+
+vpc:
+  id: "vpc-0499ce6bc647bff24"  
+  cidr: "172.31.0.0/16"
+  subnets:
+    # must provide 'private' and/or 'public' subnets by availibility zone as shown
+    private:
+      us-east-1a:
+        id: "subnet-017e96618658d1383"
+        cidr: "172.31.100.0/24" 
+      us-east-1b:
+        id: "subnet-0ebdef638fbfd2c0b"
+        cidr: "172.31.101.0/24"  
+      us-east-1c:
+        id: "subnet-0dcc08ba81ccd6b65"
+        cidr: "172.31.102.0/24"
+#iam:
+  #serviceRoleARN: "arn:aws:iam::057929149431:role/eksctl-de-fargate3-cluster-ServiceRole-OGOPFO55I4P7"
+
+fargateProfiles:
+  - name: fp-default
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: default
+      # All workloads in the "kube-system" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: kube-system
+      # All workloads in the "metrics" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: metrics
+  - name: fp-dev
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: dev
+          
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
