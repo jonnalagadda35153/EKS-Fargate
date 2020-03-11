@@ -1,3 +1,17 @@
+# AWS DISCLAMER
+# Provided to Customer on 12 March 2020
+# ---
+
+# The following files are provided by AWS Professional Services describe the process to create an read-only breakglass role for security within your AWS Automated Landing Zone. These are non-production ready and are to be used for testing purposes.
+
+# These files is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+# OR CONDITIONS OF ANY KIND, either express or implied. See the License
+# for the specific language governing permissions and limitations under the License.
+
+# (c) 2019 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+# This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
+# http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
+
 import boto3
 import configparser
 import sys

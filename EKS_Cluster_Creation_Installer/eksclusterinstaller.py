@@ -47,7 +47,7 @@ else:
     print("\033[1;32;40m Creating EKS Cluster in an existing VPC  \n")
     
 eks_version = 'eksctl version'
-eks_nodes = 'kubectl get nodes'
+eks_nodes = 'kubectl get nodes -o wide'
 IAM_auth_download = "curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator"
 IAM_auth_install = "chmod +x ./aws-iam-authenticator"
 IAM_binary_copy = "mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$HOME/bin:$PATH"
@@ -60,7 +60,7 @@ helm_modify = 'chmod +x get_helm.sh'
 helm_install = './get_helm.sh'
 rbac_install = 'kubectl apply -f RBAC.yaml'
 tiller_install = 'helm init --service-account tiller'
-metricserver_install = 'helm install stable/metrics-server --name metrics-server --version 2.0.4 --namespace metrics'
+metricserver_install = 'helm install --name metrics-server stable/metrics-server --namespace metrics'
 hpa_test = 'kubectl get hpa'
 
 print('\033[1m' + "Downloading eksctl")
