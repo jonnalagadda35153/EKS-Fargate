@@ -17,10 +17,14 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: de-fargate3
+  name: de-iot-sdbx3-fargate
   region: us-east-1
+  #version: "1.14"
 
 vpc:
+  #clusterEndpoints:
+    #publicAccess:  true
+    #privateAccess: true
   id: "vpc-0499ce6bc647bff24"  
   cidr: "172.31.0.0/16"
   subnets:
@@ -37,33 +41,40 @@ vpc:
         cidr: "172.31.102.0/24"
 
 #To use custom IAM role for the EKS cluster uncomment the section below and replace the ARN for the IAM role.
-#iam:
-  #serviceRoleARN: "arn:aws:iam::057929149431:role/eksctl-de-fargate3-cluster-ServiceRole-OGOPFO55I4P7"
-
+iam:
+  serviceRoleARN: "arn:aws:iam::057929149431:role/eksFargateServiceRole"
 
 fargateProfiles:
-  - name: fp-default
-    #clusterName is not required is the profile is being built with cluster. This tag is reqired if the fargate profile is being added after cluster creation 
-    #clusterName: de-fargate3
-    #To use custom IAM role for pod execution uncomment the section below and replace the ARN for the IAM role.
-    #By default eksctl can create an IAM role for pod execution, provided IAM role attached to the machine running the scripts have the IAM role creation policy
-    #podExecutionRoleARN: arn:aws:iam::057929149431:role/eksctl-de-fargate3-cluster-FargatePodExecutionRole-134GNC7EN79MW
-    selectors:
-      # All workloads in the "default" Kubernetes namespace will be
-      # scheduled onto Fargate:
-      - namespace: default
-      # All workloads in the "kube-system" Kubernetes namespace will be
-      # scheduled onto Fargate:
-      - namespace: kube-system
-      # All workloads in the "metrics" Kubernetes namespace will be
-      # scheduled onto Fargate:
-      - namespace: metrics
-    
-  - name: fp-dev
+
+  - name: alb-ingress-controller
     selectors:
       # All workloads in the "dev" Kubernetes namespace matching the following
       # label selectors will be scheduled onto Fargate:
-      - namespace: dev
+      - namespace: kube-system
+      
+  - name: coredns
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: kube-system
+      
+  - name: metrics-server
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: kube-system #metrics
+      
+  - name: de-iot-sdbx-fargate
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: default
+      
+  #- name: fp-dev
+    #selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      #- namespace: dev
         #You can optionally specify Kubernetes labels to match for the selector. The selector only matches pods that have all of the labels that are specified in the selector.
         #labels:
           #env: dev

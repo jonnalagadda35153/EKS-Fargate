@@ -23,12 +23,13 @@ os.system(apply_rbac)
 
 #Set up OIDC provider with the cluster and create the IAM policy used by the ALB Ingress Controller
 oidc_setup = 'eksctl utils associate-iam-oidc-provider --cluster '+str(CLUSTER_NAME)+' --approve'
+print(oidc_setup)
 os.system(oidc_setup)
 print('OIDC setup is done')
 
 #Creating an iamserviceaccount and attaching role.
 print('Attaching policy to iamserviceaccount')
-attach_policy = 'eksctl create iamserviceaccount --name alb-ingress-controller --namespace kube-system --cluster ' + str(CLUSTER_NAME) +' --attach-policy-arn arn:aws:iam::'+str(AWS_ACCOUNT_ID)+':policy/'+str(ingress_role) +'--override-existing-serviceaccounts --approve '
+attach_policy = 'eksctl create iamserviceaccount --name alb-ingress-controller --namespace kube-system --cluster ' + str(CLUSTER_NAME) +' --attach-policy-arn arn:aws:iam::'+str(AWS_ACCOUNT_ID)+':policy/'+str(ingress_role) +' --override-existing-serviceaccounts --approve '
 print(attach_policy)
 os.system(attach_policy)
 print('Attached Policy')

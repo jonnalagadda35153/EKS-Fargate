@@ -12,16 +12,16 @@
 # This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
 # http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.​
 
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: dev
----
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: dev
+#---
 apiVersion: v1
 kind: Service
 metadata:
   name: appf
-  namespace: dev
+  #namespace: dev
 spec:
   type: NodePort
   ports:
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: appf
-  namespace: dev
+  #namespace: dev
 spec:
   replicas: 3
   strategy:
@@ -70,13 +70,22 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: appf
-  namespace: dev
+  name: appff
+  #namespace: dev
   annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:057929149431:certificate/ed6b00f2-d6ff-465e-a0ff-1f702da9f1e9 
+    alb.ingress.kubernetes.io/healthcheck-path: /health.html 
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS 
+    alb.ingress.kubernetes.io/backend-protocol: HTTPS
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing 
     alb.ingress.kubernetes.io/target-type: ip
-    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:682651395775:certificate/2bf2988f-7d08-43f4-99d8-51069b2d22f9
+    #alb.ingress.kubernetes.io/security-groups: sg-08ff9b4204047bd30
+    #alb.ingress.kubernetes.io/tags: Name=app-alb
+    #Add subnets
+    alb.ingress.kubernetes.io/subnets: subnet-0716aafc38b82ac39, subnet-05d4e8384b82c1648, subnet-03c8405e45c7d93d8
   labels:
     app: appf
 spec:
@@ -92,7 +101,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: appf
-  namespace: dev
+  #namespace: dev
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
