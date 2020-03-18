@@ -1,0 +1,109 @@
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: fluentd
+#   namespace: sfapp
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: fluentd
+  namespace: sfapp
+rules:
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - pods
+      - pods/logs
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd-role-binding
+  namespace: sfapp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluentd
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: sfapp
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: sfapp
+  labels:
+    k8s-app: fluentd-cloudwatch
+data:
+  fluent.conf: |
+    @include containers.conf
+
+    <match fluent.**>
+      @type null
+    </match>
+  containers.conf: |
+    <source>
+      @type tail
+      @id in_tail_container_logs
+      @label @containers
+      path /opt/cloud/logs/*.log
+      pos_file /usr/local/fluentd-containers.log.pos
+      tag *
+      read_from_head true
+      <parse>
+        @type none
+        # @type json
+        # time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+
+    <label @containers>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata
+      </filter>
+
+      <filter **>
+        @type record_transformer
+        @id filter_containers_stream_transformer
+        <record>
+          stream_name fluentdlogs #${tag_parts[3]}
+        </record>
+      </filter>
+
+      <filter **>
+        @type concat
+        key log
+        multiline_start_regexp /^\S/
+        separator ""
+        flush_interval 5
+        timeout_label @NORMAL
+      </filter>
+
+      <match **>
+        @type relabel
+        @label @NORMAL
+      </match>
+    </label>
+
+    <label @NORMAL>
+      <match **>
+        @type cloudwatch_logs
+        @id out_cloudwatch_logs_containers
+        region "#{ENV.fetch('REGION')}"
+        log_group_name "/aws/containerinsights/#{ENV.fetch('CLUSTER_NAME')}/fluentdapp"
+        log_stream_name_key stream_name
+        remove_log_stream_name_key true
+        auto_create_stream true
+        <buffer>
+          flush_interval 5
+          chunk_limit_size 2m
+          queued_chunks_limit_size 32
+          retry_forever true
+        </buffer>
+      </match>
+    </label>
