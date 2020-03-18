@@ -21,13 +21,14 @@
 ```
 Once the pods are up
  1. Login into the appf container and write sample log with the command
-    **kubectl exec -it <pod name> -c appf -n <namespace> bash**
-    **echo {"name": "Hello world"} > /opt/cloud/logs/test.log**
+      kubectl exec -it <pod name> -c appf -n <namespace> bash
+      echo {"name": "Hello world"} > /opt/cloud/logs/test.log
     
 2. Check if the same file is being read by fluentd container
-   **kubectl exec -it <pod name> -c fluentd-sidecar -n <namespace> bash**
-   **ls /opt/cloud/logs/** 
-   should give the test.log
+      kubectl exec -it <pod name> -c fluentd-sidecar -n <namespace> bash
+      ls /opt/cloud/logs/
+   
+      should give the test.log
 ```
 Now you can view logstream **/aws/containerinsights/clustername/fluentdapp** in the cloudwatch console.
 
