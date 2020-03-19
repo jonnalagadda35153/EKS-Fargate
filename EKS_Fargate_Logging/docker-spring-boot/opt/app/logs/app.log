@@ -1,0 +1,8 @@
+[main] DEBUG com.mkyong.StartApplication  - I am here
+[main] INFO  com.mkyong.StartApplication  - This is a sample log message
+[restartedMain] DEBUG com.mkyong.StartApplication  - I am here
+[restartedMain] INFO  com.mkyong.StartApplication  - This is a sample log message
+[main] DEBUG com.mkyong.StartApplication  - I am here
+[main] INFO  com.mkyong.StartApplication  - This is a sample log message
+[restartedMain] DEBUG com.mkyong.StartApplication  - I am here
+[restartedMain] INFO  com.mkyong.StartApplication  - This is a sample log message

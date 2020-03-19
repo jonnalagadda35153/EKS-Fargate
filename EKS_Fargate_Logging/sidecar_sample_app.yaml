@@ -21,7 +21,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: appf
-  namespace: sfapp
+  namespace: spring 
 spec:
   type: NodePort
   ports:
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: appf
-  namespace: sfapp
+  namespace: spring
 spec:
   replicas: 3
   strategy:
@@ -66,8 +66,8 @@ spec:
           emptyDir: {}
         - name: journal-scratch
           emptyDir: {}
-      serviceAccount: fluentd
-      serviceAccountName: fluentd
+      serviceAccount: spring-sa
+      serviceAccountName: spring-sa
       initContainers:
         - name: copy-fluentd-config
           image: busybox
@@ -82,12 +82,12 @@ spec:
           command: ['sh','-c','']
       containers:
         - name: appf
-          image: dmilan/docker-sample-restapp-flask
-          imagePullPolicy: IfNotPresent
+          image: jaisai/logapp:0.1
+          imagePullPolicy: Always
           volumeMounts:
           #- mountPath: /var/log/appf
             #name: log-scratch
-          - mountPath: /opt/cloud/logs
+          - mountPath: /opt/app/logs
             name: cloud-api-logs
           resources:
             requests:
@@ -98,7 +98,7 @@ spec:
               memory: 1Gi
           securityContext:
             privileged: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
             allowPrivilegeEscalation: false
           ports:
             - containerPort: 8080
@@ -131,21 +131,13 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: appff
-  namespace: sfapp
+  namespace: spring
   annotations:
-    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:057929149431:certificate/ed6b00f2-d6ff-465e-a0ff-1f702da9f1e9 
-    #alb.ingress.kubernetes.io/healthcheck-path: /health.html 
-    #alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS 
-    #alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-    #alb.ingress.kubernetes.io/listen-ports: '{"HTTPS": 443}]'
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing 
     alb.ingress.kubernetes.io/target-type: ip
-    #alb.ingress.kubernetes.io/security-groups: sg-08ff9b4204047bd30
-    #alb.ingress.kubernetes.io/tags: Name=app-alb
-    #Add subnets
     #alb.ingress.kubernetes.io/subnets: subnet-0716aafc38b82ac39, subnet-05d4e8384b82c1648, subnet-03c8405e45c7d93d8
   labels:
     app: appf
@@ -153,7 +145,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /ping
+          - path: /
             backend:
               serviceName: appf
               servicePort: 80
@@ -162,7 +154,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: appf
-  namespace: sfapp
+  namespace: spring
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
