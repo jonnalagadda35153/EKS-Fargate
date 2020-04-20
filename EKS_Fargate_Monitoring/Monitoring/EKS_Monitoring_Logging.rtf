@@ -1,0 +1,100 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2511
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fnil\fcharset136 AmazonEmber-Regular;
+\f3\fnil\fcharset0 Monaco;\f4\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue233;\red0\green0\blue0;\red18\green19\blue24;
+\red255\green255\blue255;\red239\green240\blue240;\red239\green0\blue24;\red52\green52\blue52;\red41\green114\blue213;
+\red25\green35\blue47;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c93333;\cssrgb\c0\c0\c0;\cssrgb\c8627\c9804\c12157;
+\cssrgb\c100000\c100000\c100000;\cssrgb\c94902\c95294\c95294;\cssrgb\c96078\c0\c11373;\cssrgb\c26667\c26667\c26667;\cssrgb\c20000\c53333\c86667;
+\cssrgb\c12941\c18431\c24314;}
+\margl1440\margr1440\vieww28600\viewh13920\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs32 \cf0 \ul \ulc0 Monitoring
+\f1\b0 \ulnone :\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+Prometheus:\
+\
+Create a file prometheus-storageclass.yaml with the below script\
+\
+kind: StorageClass\
+apiVersion: storage.k8s.io/v1\
+metadata:\
+  name: prometheus\
+  namespace: prometheus\
+provisioner: kubernetes.io/aws-ebs\
+parameters:\
+  type: gp2\
+reclaimPolicy: Retain\
+mountOptions:\
+  - debug\
+\
+Install Prometheus with the file - prometheus_values.yaml\
+Command: helm install -f prometheus-values.yaml stable/prometheus --name prometheus --namespace prometheus\
+Command: helm install prometheus -f prometheus_values.yml stable/prometheus --namespace prometheus\
+\
+Once all the pods and prometheus server is up install Grafana\
+ \
+2. Install grafana with the file - grafana-values.yaml\
+Command: helm install -f grafana-values.yaml stable/grafana --name grafana --namespace grafana\
+\
+Get the load balancer to use the graph with kubectl get svc -n grafana\'92\
+\
+Login with admin & EKS!sAWSome\
+\
+
+\fs26 *You can add many dashboards for Grafana from {\field{\*\fldinst{HYPERLINK "https://grafana.com/grafana/dashboards?dataSource=prometheus&category=aws"}}{\fldrslt \cf2 \expnd0\expndtw0\kerning0
+\ul \ulc2 https://grafana.com/grafana/dashboards?dataSource=prometheus&category=aws}}\cf2 \expnd0\expndtw0\kerning0
+\ul \ulc2 .      \
+\cf3 \ulnone To use the same dashboard for multiple data sources, download the dashboard from grafana website  and change the \'93uid\'94\cf2 \ul \
+
+\fs32 \cf0 \kerning1\expnd0\expndtw0 \ulnone \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b \cf0 NOTE
+\f1\b0 : 
+\f2\fs26 \cf4 \cb5 \expnd0\expndtw0\kerning0
+If you have more than one security group associated to your worker nodes, then one of the security groups must have the following tag applied to it. If you have only one security group associated to your worker nodes, then the tag is optional.  
+\f3 \cf3 \cb6 kubernetes.io/cluster/\cf7 <cluster-name>
+\f1 \cf3 \cb1  
+\f3 \cb6 owned
+\fs32 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \cb1 \kerning1\expnd0\expndtw0 Generally remove the tag 
+\f3\fs26 \cf3 \cb6 \expnd0\expndtw0\kerning0
+kubernetes.io/cluster/\cf7 <cluster-name>
+\f1 \cf3 \cb1  
+\f3 \cb6 owned 
+\f1\fs32 \cf0 \cb1 \kerning1\expnd0\expndtw0 from node instance security group (eg:
+\f4\fs26 \cf8 \cb5 \expnd0\expndtw0\kerning0
+\'a0{\field{\*\fldinst{HYPERLINK "https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#SecurityGroups:groupId=sg-0bb03c90aed72a7d3;sort=desc:tag:Name"}}{\fldrslt \cf9 \ul \ulc9 eksctl-GE-EKS-CIDR-nodegroup-eks-system-workload-SG-18SY8NVW2R15C}}\cf9 \ul \ulc9 )
+\f1\fs32 \cf0 \cb1 \kerning1\expnd0\expndtw0 \ulnone \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b \cf0 \ul Logging
+\f1\b0 \ulnone :\
+\
+\pard\pardeftab720\partightenfactor0
+\cf10 \expnd0\expndtw0\kerning0
+Run the command:helm repo add bitnami {\field{\*\fldinst{HYPERLINK "https://charts.bitnami.com/bitnami"}}{\fldrslt \cf2 \ul \ulc2 https://charts.bitnami.com/bitnami}}\cf0 \kerning1\expnd0\expndtw0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+1. Install Elastic Search Cluster with the command:\
+\pard\pardeftab720\partightenfactor0
+\cf10 \expnd0\expndtw0\kerning0
+helm install --name elasticsearch --set \\\
+  name=elasticsearch,master.replicas=3, -\
+\
+Wait for the elasticsearch-elasticsearch-discovery pod is up and running\
+\
+\
+2. Install Kibana from the kibana_values.yaml\
+Command: helm install -f kibana_values.yaml-a --name kibana --namespace kibana\
+\
+3. Install fluentd\
+Command : kubectl apply -f fluent.yaml\
+\
+Now get the load balancer for kibana and use it}
