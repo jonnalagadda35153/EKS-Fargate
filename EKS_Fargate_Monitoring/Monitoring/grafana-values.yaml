@@ -112,30 +112,36 @@
   ##
   service:
     type: LoadBalancer
-    port: 80
+    ports:
+    port: 443
     targetPort: 3000
       # targetPort: 4181 To be used with a proxy extraContainer
     annotations:
-      alb.ingress.kubernetes.io/target-type: ip
+       #Working set
+      #service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-west-2:682651395775:certificate/2bf2988f-7d08-43f4-99d8-51069b2d22f9
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: '*'
+       ########
     labels: {}
     portName: service
 
   ingress:
-    enabled: true
-    annotations: 
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-      alb.ingress.kubernetes.io/subnets: subnet-0716aafc38b82ac39, subnet-05d4e8384b82c1648, subnet-03c8405e45c7d93d8
-      #alb.ingress.kubernetes.io/target-type: ip
-      #alb.ingress.kubernetes.io/backend-protocol: HTTP
+    enabled: false
+    path: /*
+    annotations:
+      # kubernetes.io/ingress.class: alb
+      # alb.ingress.kubernetes.io/scheme: internet-facing
+      # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:682651395775:certificate/2bf2988f-7d08-43f4-99d8-51069b2d22f9
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      # alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+      # external-dns.alpha.kubernetes.io/hostname: grafana.eksapps.com
+      # alb.ingress.kubernetes.io/backend-protocol: HTTPS
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     labels: {}
-    path: /
     hosts:
-      - chart-example.local
+      #-grafana.eksapps.com
     ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
     extraPaths: []
     # - path: /*
@@ -158,9 +164,7 @@
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   #
-  nodeSelector: {
-      disktype: "ssd"
-  }
+  nodeSelector: {}
 
   ## Tolerations for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -234,7 +238,7 @@
 
   # Administrator credentials when not using an existing secret (see below)
   adminUser: admin
-  adminPassword: admin
+  adminPassword: jaisai
 
   # Use an existing secret for the admin user.
   admin:
@@ -304,11 +308,18 @@
     datasources.yaml:
       apiVersion: 1
       datasources:
-      - name: Prometheus
+      - name: source1
         type: prometheus
-        url: http://prometheus-server.prometheus.svc.cluster.local
+        url: http://aa13d804052a211eab1ab0238712e05b-2100820305.us-west-2.elb.amazonaws.com
         access: proxy
         isDefault: true
+        editable: true
+      - name: source2
+        type: prometheus
+        url: http://a40f968b3505a11eaaccc02bd7b6ccc7-80680278.us-west-2.elb.amazonaws.com
+        access: proxy
+        #isDefault: true
+        editable: true
 
   ## Configure notifiers
   ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -396,6 +407,14 @@
       mode: console
     grafana_net:
       url: https://grafana.net
+    smtp:
+      enabled: true
+      host: "smtp.gmail.com:587"
+      user: "templast121@gmail.com"
+      password: "temp@121"
+      skip_verify: true
+      from_address: "templast121@gmail.com"
+      from_name: "Grafana"
   ## LDAP Authentication can be enabled with the following values on grafana.ini
   ## NOTE: Grafana will fail to start if the value for ldap.toml is invalid
     # auth.ldap:
@@ -432,9 +451,13 @@
   smtp:
     # `existingSecret` is a reference to an existing secret containing the smtp configuration
     # for Grafana.
-    existingSecret: ""
-    userKey: "user"
-    passwordKey: "password"
+    # enabled: true
+    # host: "smtp.gmail.com:587"
+    # user: "templast121@gmail.com"
+    # password: "temp@121"
+    # skip_verify: true
+    # from_address: "templast121@gmail.com"
+    # from_name: "Grafana"
 
   ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
   ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
