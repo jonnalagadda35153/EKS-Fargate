@@ -765,7 +765,7 @@ server:
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {
-      disktype: "ssd"
+      node: "monitoring"
     }
 
   ## Pod affinity
