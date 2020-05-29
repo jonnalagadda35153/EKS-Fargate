@@ -23,4 +23,6 @@ Now you can view logstream **/aws/containerinsights/{clustername}/springapp** in
 
 With this demo we are able to run fluentd as sidecar and push logs to cloudwatch
 
+Quip: https://quip-amazon.com/HaapAaBOaGVo/Application-Logging-with-EKS-on-Fargate-using-Fluentd-CloudWatch
+
    
